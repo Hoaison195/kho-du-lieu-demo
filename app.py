@@ -1,71 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Phần mềm lưu trữ dữ liệu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f4f4f4;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .section {
+      margin-top: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    iframe, img {
+      width: 100%;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+    }
+    a {
+      text-decoration: none;
+      color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Phần mềm lưu trữ tài liệu và hình ảnh</h1>
 
-import streamlit as st
-import os
-import uuid
-import pandas as pd
+  <div class="section">
+    <h2>Ảnh minh họa</h2>
+    <img src="demo_image.jpg" alt="Ảnh minh họa" />
+  </div>
 
-UPLOAD_DIR = "uploaded_files"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+  <div class="section">
+    <h2>Tài liệu PDF</h2>
+    <iframe src="demo.pdf" height="500px"></iframe>
+  </div>
 
-# Load metadata
-metadata_file = "metadata.csv"
-if os.path.exists(metadata_file):
-    df = pd.read_csv(metadata_file)
-else:
-    df = pd.DataFrame(columns=["id", "filename", "description", "path"])
-
-st.title("📁 KHO DỮ LIỆU THỬ NGHIỆM")
-
-# Upload Section
-st.header("📤 Tải dữ liệu lên")
-uploaded_file = st.file_uploader("Chọn file bất kỳ", type=None)
-desc = st.text_input("Mô tả tài liệu")
-
-if st.button("Tải lên") and uploaded_file:
-    file_id = str(uuid.uuid4())
-    save_path = os.path.join(UPLOAD_DIR, f"{file_id}_{uploaded_file.name}")
-    with open(save_path, "wb") as f:
-        f.write(uploaded_file.read())
-    df = pd.concat([df, pd.DataFrame([{
-        "id": file_id,
-        "filename": uploaded_file.name,
-        "description": desc,
-        "path": save_path
-    }])], ignore_index=True)
-    df.to_csv(metadata_file, index=False)
-    st.success("✅ Tải file thành công!")
-
-# Display Section
-st.header("📚 Danh sách tài liệu")
-if len(df) > 0:
-    for i, row in df.iterrows():
-        with st.expander(f"📄 {row['filename']}"):
-            st.write("📝 Mô tả:", row["description"])
-            if row["filename"].lower().endswith((".png", ".jpg", ".jpeg")):
-                st.image(row["path"])
-            elif row["filename"].lower().endswith(".pdf"):
-                st.write(f"[📄 Xem PDF]({row['path']})")
-            elif row["filename"].lower().endswith((".xlsx", ".xls")):
-                try:
-                    df_xl = pd.read_excel(row["path"])
-                    st.dataframe(df_xl)
-                except Exception as e:
-                    st.error("Không đọc được file Excel")
-            else:
-                st.write("📁 Đường dẫn:", row["path"])
-
-            new_desc = st.text_input("✏️ Sửa mô tả", value=row["description"], key=row["id"])
-            if st.button("Cập nhật mô tả", key="update_" + row["id"]):
-                df.loc[i, "description"] = new_desc
-                df.to_csv(metadata_file, index=False)
-                st.success("Đã cập nhật mô tả")
-
-            if st.button("🗑️ Xóa", key="delete_" + row["id"]):
-                if os.path.exists(row["path"]):
-                    os.remove(row["path"])
-                df.drop(i, inplace=True)
-                df.to_csv(metadata_file, index=False)
-                st.success("Đã xóa file")
-                st.experimental_rerun()
-else:
-    st.info("Chưa có dữ liệu nào được tải lên.")
+  <div class="section">
+    <h2>Tài liệu khác (Word, Excel...)</h2>
+    <ul>
+      <li><a href="demo.docx" download>Tải file Word: demo.docx</a></li>
+      <li><a href="demo.xlsx" download>Tải file Excel: demo.xlsx</a></li>
+      <li><a href="KHO%20D%E1%BB%AF%20LI%E1%BB%86U%20M%E1%BA%ACU.xlsx" download>Tải Kho Dữ Liệu Mẫu</a></li>
+    </ul>
+  </div>
+</body>
+</html>
